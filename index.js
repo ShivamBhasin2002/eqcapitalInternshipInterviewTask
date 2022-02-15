@@ -37,8 +37,35 @@ const requireLogin = (req, res, next) => {
 };
 
 app.get('/', requireLogin, async (req, res) => {
-	const user = await User.findById(req.session.user_id);
-	res.render('secret', { username: user.username, courses: user.courses });
+	const user = await User.findById(req.session.user_id),
+		selectCourses = (courses) => {
+			let res = [];
+			if (courses !== 'noCourses' && courses !== 'course2')
+				res.push({
+					title: 'Course 1',
+					author: 'Shivam Bhasin',
+					about: 'Web Development',
+					duration: '64hrs',
+					access: 'previewOnly' !== courses ? 'true' : 'false'
+				});
+			if (courses !== 'noCourses' && courses !== 'course1')
+				res.push({
+					title: 'Course 2',
+					author: 'Shivam Bhasin',
+					about: 'Blockchain',
+					duration: '32hrs',
+					access: 'previewOnly' !== courses ? 'true' : 'false'
+				});
+			return res;
+		};
+	res.render('secret', {
+		username: user.username,
+		courses: selectCourses(user.courses)
+	});
+});
+
+app.get('/courses/:title', (req, res) => {
+	res.send(`You have reached to ${req.params.title}`);
 });
 
 app.get('/user/login', (req, res) => {
